@@ -1,7 +1,7 @@
 package apma
 
 import (
-	"fmt"
+	"math"
 )
 
 const EMPTY int64 = -1
@@ -9,13 +9,19 @@ const EMPTY int64 = -1
 const LO_TH = 0.5 // lower density threshold
 const HI_TH = 2.0 // higher density threshold
 
+/* PMA is a sorted structure for storing integers with support for O(logN) Insert / Search() operation
+   and continuous memory arrangement for efficient Scan() operation.
+*/
 type PMA struct {
 	// only accept unsigned int
 	// use -1 to mark empty slot
-	arr          []int64
+	arr []int64
+
 	sizeDistinct int // number of distinct elements
 	// a PMA needs to define 4 density thresholds, 1 upper and lower, and
 	level int // keep track of how many levels we have
+
+	segmentSize int
 	// for both level H (root) and level 0 (leaf) respectively
 	// all levels inbetween will be extrapolated using an arithematic sequence.
 	// upper density
@@ -28,6 +34,13 @@ type PMA struct {
 	// all other properties can be devised from these fields
 }
 
+// Resize allocate a new array of appropriate size when top level density reaches outside of our density bound.
+// At the base, SegmentSize is used to derive all other all parameters of our array,
+//  - the numSegment is the Hyperceil (i.e. closest power of 2 rounded up ) of ideal numSeg
+
+func (this *PMA) resize() {
+}
+
 /*
  * To insert, find the correct non-empty index of x and it's coresponding "segment" node in the segment binary tree
  * If the current segment has enough free space (threshold is below upper bound), Insert x and rebalance the whole segment
@@ -35,18 +48,46 @@ type PMA struct {
  * If the even root does not have enough free space, grow the entire array
  */
 func (this *PMA) Insert(x uint) {
-	// find the correct "leaf" segment where x belongs
+	// find i where arr[i] >= x
 	i := this.find(x)
+	// TODO insert x before i
+	// should x be insert before or after i ???
 
-	segLo, segHi := this.getSegment(i)
+	curLevel := 0
+	segLo, segHi := this.getSegmentLevel(i, curLevel) // level 0 = leaf
 	countDistinct := 0
-	for i := segLo; i <= segHi; i++ {
-		if this.arr[i] > EMPTY {
-			countDistinct++
+
+	left, right := i, i+1
+	for curLevel <= this.level {
+		for ; left >= segLo; left-- {
+			if this.arr[left] > EMPTY {
+				countDistinct++
+			}
 		}
+
+		for ; right <= segHi; right++ {
+			if this.arr[right] > EMPTY {
+				countDistinct++
+			}
+		}
+		density := float64(countDistinct) / float64(segHi-segLo)
+		p_l, t_l := this.getDensity(curLevel)
+		if p_l <= density && density <= t_l {
+			break
+		}
+
+		// current segment density not suitable, goes up
+		curLevel++
+		segLo, segHi = this.getSegmentLevel(i, curLevel)
 	}
 
-	fmt.Println(segLo, segHi)
+	// we reach here either cause curLevel > top level, or curLevel's density is suitable
+	// left = seglow -1, right = seghigh +1
+	left, right = left+1, right-1
+	if curLevel > this.level { // reached top level without suitable segment
+		this.upsize()
+	}
+	this.spread(left, right)
 }
 
 /* From leaf to root, find the lowest node that has correct density
@@ -58,6 +99,13 @@ func (this *PMA) Insert(x uint) {
  *  etc ...
  */
 func (this *PMA) findValidAncestor(segLo, segHi int) {
+}
+
+func (this *PMA) upsize() {
+}
+
+// spread all elements in the range array[left, right] evenly spaced
+func (this *PMA) spread(left, right int) {
 }
 
 func (this *PMA) getDensity(level int) (lower, upper float64) {
@@ -117,7 +165,19 @@ func (this *PMA) find(x uint) (index int) {
 	return low
 }
 
-// getSegment return the [low, high] of leaf segment that index belongs to
-func (this *PMA) getSegment(index int) (l, h int) {
-	return 0, 0 // TODO
+// getSegmentLevel return the [low, high] of the segment that index belongs to
+// Explain: at level 0, new segment is located every <segmentSize> index
+// At level 1, 2 segments are merged, so a new segment is located every <2*segmentSize>
+// At level 2, 4 segments are merged, so a new segment is located every <4*segmentSize>
+// At level l, a new segment is located at every <2^l*segmentSize>
+//
+// If @param: level are are higher than max level of array, just return
+// the whole array i.e.: [0, len(array)-1]
+func (this *PMA) getSegmentLevel(index int, level int) (low, high int) {
+	segmentSize := int(math.Pow(2, float64(level))) * this.segmentSize
+	if segmentSize > len(this.arr) {
+		segmentSize = len(this.arr)
+	}
+	low = (index / segmentSize) * segmentSize // floor off to closest segment size
+	return low, low + segmentSize - 1
 }
