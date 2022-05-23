@@ -48,13 +48,10 @@ func (this *PMA) resize() {
  * If the even root does not have enough free space, grow the entire array
  */
 func (this *PMA) Insert(x uint) {
-	// find i where arr[i] >= x
 	i := this.find(x)
-	// TODO insert x before i
-	// should x be insert before or after i ???
 
-	curLevel := 0
-	segLo, segHi := this.getSegmentLevel(i, curLevel) // level 0 = leaf
+	curLevel := 0 // leaf
+	segLo, segHi := this.getSegmentLevel(i, curLevel)
 	countDistinct := 0
 
 	left, right := i, i+1
@@ -87,25 +84,24 @@ func (this *PMA) Insert(x uint) {
 	if curLevel > this.level { // reached top level without suitable segment
 		this.upsize()
 	}
-	this.spread(left, right)
-}
 
-/* From leaf to root, find the lowest node that has correct density
- * (between [lower,upper]) then return the boundary.
- * If the whole array violate density, return [-1, len(array)]
- * Calculation:
- *  h       segment start at floor(index / h) * h
- *  h-1     segment start at floor(index / (h-1)) * (h-1)
- *  etc ...
- */
-func (this *PMA) findValidAncestor(segLo, segHi int) {
+	// TODO: insert
+	this.spreadInsert(left, right, x)
 }
 
 func (this *PMA) upsize() {
 }
 
 // spread all elements in the range array[left, right] evenly spaced
-func (this *PMA) spread(left, right int) {
+// insert the x element at the appropriate place also
+func (this *PMA) spreadInsert(left, right int, x uint, count int) {
+	ratio := count / (right - left)
+	write, read := 0, 0
+	for write < right {
+		for read < write {
+			read++
+		}
+	}
 }
 
 func (this *PMA) getDensity(level int) (lower, upper float64) {
