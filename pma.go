@@ -86,7 +86,7 @@ func (this *PMA) Insert(x uint) {
 	}
 
 	// TODO: insert
-	this.spreadInsert(left, right, x)
+	this.diluteInsert(left, right, x, countDistinct)
 }
 
 func (this *PMA) upsize() {
@@ -94,20 +94,9 @@ func (this *PMA) upsize() {
 
 // spread all elements in the range array[left, right] evenly spaced
 // insert the x element at the appropriate place also
-func (this *PMA) spreadInsert(left, right int, x uint, count int) {
+func (this *PMA) diluteInsert(left, right int, x uint, count int) {
 	// s is the "spacing" between each non-zero element
 
-	s := (right - left + 1) / count
-
-	r, w := left, left
-	for w < right {
-		if this.arr[r] == EMPTY {
-			r++
-		} else if this.arr[w] == EMPTY {
-			this.arr[w] = this.arr[r]
-			w += s
-		}
-	}
 }
 
 func (this *PMA) getDensity(level int) (lower, upper float64) {
