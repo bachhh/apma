@@ -95,11 +95,17 @@ func (this *PMA) upsize() {
 // spread all elements in the range array[left, right] evenly spaced
 // insert the x element at the appropriate place also
 func (this *PMA) spreadInsert(left, right int, x uint, count int) {
-	ratio := count / (right - left)
-	write, read := 0, 0
-	for write < right {
-		for read < write {
-			read++
+	// s is the "spacing" between each non-zero element
+
+	s := (right - left + 1) / count
+
+	r, w := left, left
+	for w < right {
+		if this.arr[r] == EMPTY {
+			r++
+		} else if this.arr[w] == EMPTY {
+			this.arr[w] = this.arr[r]
+			w += s
 		}
 	}
 }
