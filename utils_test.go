@@ -9,6 +9,12 @@ func TestValidateArray(t *testing.T) {
 	testCase := map[string][]int64{
 		"0.3 head concentrate": []int64{1, 2, 3, 4, 5, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		"0.5 head concentrate": []int64{1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1},
+
+		// heavy head skew that requires backtrackinng
+		// [1 2 3 4 5 6 7 0 0 0 0 0 0 0 ]
+		//
+		// BOTH head and tail skew, requires backtracking
+		// [1 2 3 0 0 0 0 4]
 	}
 
 	countDistinct := func(arr []int64) int {

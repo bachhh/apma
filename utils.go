@@ -1,19 +1,5 @@
 package apma
 
-func placement(capacity, count int) (place func(arr []int64, index int)) {
-	// if value is less than zero, then we place the zeros in array
-	// if zero is more than value, then we place the values in array
-	placingZero := false
-	if count > (capacity+1)/2 {
-		placingZero = true
-		count = capacity - count
-	}
-	spacing := capacity / count
-
-	return func(arr []int64, index int) {
-	}
-}
-
 // Given an array of randomly placed "value", and "space" like this {1,0,0,0,2,3,4,0,0,6,7...}
 //
 // - "value" are elements are > 0
@@ -32,7 +18,22 @@ func placement(capacity, count int) (place func(arr []int64, index int)) {
 func diluteInsert(arr []int64, left, right int, x uint, count int) {
 	// s is the "spacing" between each non-zero element
 
-	isWriteIndex := checkWriteIndex(right-left+1, count)
-	for i := left; i <= right; i++ {
+	capacity := right - left + 1
+	spacing := capacity / count
+	y := 0
+	valueCounter := 0 // keep track of how many value before x
+
+	isCorrectPlace := func(index int) bool {
+		return index*count == spacing
 	}
+
+	x, y := count, len(arr)
+	for x >= 0 {
+		if y == spacing*x {
+			swap(arr[x], arr[y])
+			x--
+		}
+		y--
+	}
+
 }
