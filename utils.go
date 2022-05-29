@@ -1,39 +1,43 @@
 package apma
 
-// Given an array of randomly placed "value", and "space" like this {1,0,0,0,2,3,4,0,0,6,7...}
-//
-// - "value" are elements are > 0
-// - "space" are the zero elements
-// - Assume the density (value_counts / capacity) is always
-//    a rational factor ( 1/2, 1/3, 1/4... )
-// - All values elements are sorted, ascending order.
-//
-// Our goal is to redistribute array so that all the values are evenly space:
-//      - {1 0 0 2 0 0 3 0 0 4 0 0 6 0 0 7 0 0 } like this
-//
-// O(n) complexity, O(1) mem ?
-
-// spread all elements in the range array[left, right] evenly spaced
-// insert the x element at the appropriate place also
-func diluteInsert(arr []int64, left, right int, x uint, count int) {
-	// s is the "spacing" between each non-zero element
+func diluteInsert(arr []int64, left, right int, x int64, count int) []int64 {
+	c := 0
+	// pack
+	for i := left; i <= right; i++ {
+		if arr[i] != EMPTY {
+			if arr[i] > x { // sneak in x
+				arr[c] = x
+			} else {
+				arr[c], arr[i] = arr[i], arr[c]
+			}
+			c++
+		}
+	}
+	// there should be at least one last slot to insert x
+	if c <= right {
+		arr[c] = x
+	} else {
+		panic("trying to insert into a full array")
+	}
 
 	capacity := right - left + 1
-	spacing := capacity / count
-	y := 0
-	valueCounter := 0 // keep track of how many value before x
+	spacing := capacity / c
+	spaceZero := c+1 >= capacity*2
+	c--
 
-	isCorrectPlace := func(index int) bool {
-		return index*count == spacing
-	}
-
-	x, y := count, len(arr)
-	for x >= 0 {
-		if y == spacing*x {
-			swap(arr[x], arr[y])
-			x--
+	// spread
+	i := right
+	for c >= 0 {
+		// CASE01: each index i = spacing*k is a zero, so we writes
+		// value in indices between them.
+		// or
+		// CASE02: each index i = spacing*k is a value, so we swap
+		if (spaceZero && i%spacing != 0) ||
+			(!spaceZero && i%spacing == 0) {
+			arr[i], arr[c] = arr[c], EMPTY
+			c--
 		}
-		y--
+		i--
 	}
-
+	return arr
 }

@@ -5,46 +5,23 @@ import (
 	"testing"
 )
 
-func TestValidateArray(t *testing.T) {
-	testCase := map[string][]int64{
-		"0.3 head concentrate": []int64{1, 2, 3, 4, 5, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		"0.5 head concentrate": []int64{1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1, -1, -1, -1},
-
-		// heavy head skew that requires backtrackinng
-		// [1 2 3 4 5 6 7 0 0 0 0 0 0 0 ]
-		//
-		// BOTH head and tail skew, requires backtracking
-		// [1 2 3 0 0 0 0 4]
-	}
-
-	countDistinct := func(arr []int64) int {
-		count := 0
-		for i := range arr {
-			if arr[i] > EMPTY {
-				count++
-			}
-		}
-		return count
-	}
-
-	for _, arr := range testCase {
-		diluteInsert(arr, 0, len(arr)-1, 1, countDistinct(arr))
-	}
-}
-
 func TestWriteIndex(t *testing.T) {
-	max := 10
-
-	for capacity := 1; capacity < max; capacity++ {
-		for count := 1; count <= capacity; count++ {
-			for i := 0; i < capacity; i++ {
-				if isWriteIndex(i, capacity, count) {
-					fmt.Printf("%d ", i)
-				} else {
-					fmt.Printf("_ ")
-				}
-			}
-			fmt.Println()
-		}
+	E := EMPTY
+	cases := map[string]struct {
+		count int
+		arr   []int64
+	}{
+		"a": {7, []int64{1, 2, 4, 5, E, E, E, E, E, E, 6, 7, 8}},
+		"b": {7, []int64{1, 2, 4, 5, E, 6, 7, 8}},
+		"c": {6, []int64{E, 1, 2, 4, 5, E, 7, 8}},
+		"d": {5, []int64{1, 2, 4, 5, 6, E, E}},
+		"e": {3, []int64{1, 2, 4, E, E, E, E}},
+		"f": {3, []int64{E, E, E, E, 3, 4, 5}},
+		"g": {7, []int64{E, 1, 2, 4, 5, 6, 7, 8}},
+	}
+	for key, v := range cases {
+		fmt.Println(key)
+		_ = diluteInsert(v.arr, 0, len(v.arr)-1, 9, v.count)
+		// fmt.Printf("%+v\n%+v\n", v.arr, output)
 	}
 }

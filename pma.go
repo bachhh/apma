@@ -85,7 +85,7 @@ func (this *PMA) Insert(x uint) {
 		this.upsize()
 	}
 
-	this.diluteInsert(left, right, int64(x), countDistinct)
+	this.diluteInsert(left, right, int64(x))
 }
 
 func (this *PMA) upsize() {
@@ -93,25 +93,38 @@ func (this *PMA) upsize() {
 
 // spread all elements in the range array[left, right] evenly spaced
 // insert the x element at the appropriate place also
-func (this *PMA) diluteInsert(left, right int, x int64, count int) {
-	c := 0
+func (this *PMA) diluteInsert(left, right int, x int64) {
+
+	count := 0
 	// pack
 	for i := left; i <= right; i++ {
 		if this.arr[i] != EMPTY {
-			if this.arr[i] > x {
-				this.arr[c] = x
+			if this.arr[i] > x { // sneak in x
+				this.arr[count] = x
 			} else {
-				this.arr[c], this.arr[i] = this.arr[i], this.arr[c]
+				this.arr[count], this.arr[i] = this.arr[i], this.arr[count]
 			}
-			c++
+			count++
 		}
 	}
 
-	c--
-	// spread
-	for c >= 0 {
-	}
+	capacity := right - left + 1
+	spacing := capacity / count
+	count--
 
+	// spread
+	i := right
+	for count >= 0 {
+		// CASE01: each index i = spacing*k is a zero, so we writes
+		// value in indices between them.
+		// or
+		// CASE02: each index i = spacing*k is a value, so we swap
+		if (count+1 >= capacity*2 && i%spacing != 0) ||
+			(count+1 < capacity*2 && i%spacing == 0) {
+			this.arr[i], this.arr[count] = this.arr[count], EMPTY
+			count--
+		}
+	}
 }
 
 func (this *PMA) getDensity(level int) (lower, upper float64) {
