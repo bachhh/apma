@@ -21,7 +21,7 @@ func TestWriteIndex(t *testing.T) {
 	}
 	for key, v := range cases {
 		fmt.Println(key)
-		_ = diluteInsert(v.arr, 0, len(v.arr)-1, 9, v.count)
-		// fmt.Printf("%+v\n%+v\n", v.arr, output)
+		output := diluteInsert(v.arr, 0, len(v.arr)-1, 9, v.count)
+		fmt.Printf("%+v\n%+v\n", v.arr, output)
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-const EMPTY int64 = -1
+const EMPTY int64 = 0
 
 const LO_TH = 0.5 // lower density threshold
 const HI_TH = 2.0 // higher density threshold
