@@ -23,7 +23,11 @@ func diluteInsert(arr []int64, left, right int, x int64, count int) []int64 {
 
 	capacity := right - left + 1
 	num, dem := capacity, c // capacity / count
-	for i := right; i >= left; i-- {
+	for i := right; i >= left; {
+		if i%(num/dem) == 0 {
+			arr[i], arr[c] = arr[c], arr[i]
+			c--
+		}
 	}
 
 	return arr

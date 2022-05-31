@@ -125,6 +125,7 @@ func (this *PMA) diluteInsert(left, right int, x int64) {
 			count--
 		}
 	}
+
 }
 
 func (this *PMA) getDensity(level int) (lower, upper float64) {
